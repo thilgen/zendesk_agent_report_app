@@ -1,0 +1,17 @@
+{
+  "name": "Agent Activity",
+  "author": {
+    "name": "Chris Thilgen",
+    "email": "cthilgen@zendesk.com",
+    "url": "http://www.zendesk.com"
+  },
+  "defaultLocale": "en",
+  "private": true,
+  "location": {
+    "support": {
+      "nav_bar": "assets/iframe.html"
+    }
+  },
+  "version": "1.0",
+  "frameworkVersion": "2.0"
+}

@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "Agent Activity",
+    "short_description": "Get information about your agents.",
+    "long_description": "Get information about your agents.",
+    "installation_instructions": "Simply click install."
+  }
+}

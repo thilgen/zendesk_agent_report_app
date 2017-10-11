@@ -1,0 +1,88 @@
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css" type="text/css">
+</head>
+<body>
+  <button onclick="getAgentActivity()">Get Agent Activity</button>
+  <br><br>
+  <button onclick="exportTableToCSV('agent-activity.csv')">Export Agent Activity CSV</button>
+  <br><br>
+  <table class="table-style-three" id="agentTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>Last Login</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script type="text/javascript" src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+  <script>
+    var client = ZAFClient.init();
+
+    var agentTable = document.getElementById("agentTable");
+    agentTable.oldHTML = agentTable.innerHTML;
+
+    function exportTableToCSV(filename) {
+      var csv = [];
+      var rows = document.querySelectorAll("table tr");
+      for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll("td, th");
+        for (var j = 0; j < cols.length; j++) {
+          row.push(cols[j].innerText);
+        }
+        csv.push(row.join(","));
+      }
+      downloadCSV(csv.join("\n"), filename);
+    }
+
+    function downloadCSV(csv, filename) {
+      var csvFile;
+      var downloadLink;
+      csvFile = new Blob([csv], {type: "text/csv"});
+      downloadLink = document.createElement("a");
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    }
+
+    function getAgentActivity() {
+      agentTable.innerHTML = agentTable.oldHTML;
+      getAgentActivityWorker('/api/v2/users.json?role[]=agent&role[]=admin')
+    }
+
+    function getAgentActivityWorker(nextUrl) {
+      if ("" != nextUrl) {
+        var fetchSelf = {
+          url     : nextUrl,
+          type    : 'GET',
+          dataType: 'json'
+        };
+        client.request(fetchSelf).then(function(data) {
+          for (idx in data.users) {
+            var role = data.users[idx].role;
+            switch (data.users[idx].role_type) {
+              case 1: role = "lite agent";      break;
+              case 2: role = "chat-only agent"; break;
+            }
+            var row = agentTable.insertRow(-1);
+            row.insertCell(0).innerHTML = data.users[idx].name;
+            row.insertCell(1).innerHTML = role;
+            row.insertCell(2).innerHTML = data.users[idx].email;
+            row.insertCell(3).innerHTML = data.users[idx].last_login_at;
+          }
+          getAgentActivityWorker(data.next_page)
+        });
+      }
+    }
+
+    client.on('app.registered', function() {
+      client.invoke('resize', { width: '100%', height: '80px' });
+    });
+</script>
+</body>
+</html>
